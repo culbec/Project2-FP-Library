@@ -33,11 +33,6 @@ class LibraryController:
         """
         Initializes the controller of our application.
         """
-        """# will be completed with books
-        self._book_list = []
-        # will be completed with clients
-        self._client_list = []
-        # will be completed with {client : [{list of books}]}"""
         self._client_books = {}
         self._book_controller = BookController()
         self._client_controller = ClientController()
