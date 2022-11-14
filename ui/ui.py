@@ -148,7 +148,7 @@ class UI:
                     print("Type 'exit' to return")
                     option_print = input("Your option? ")
                     if option_print == 'exit':
-                        print("Closing the sub-menu...")
+                        print("Closing the sub-menu...\n")
                         break
                     elif option_print == '1':
                         self._print_book_list()
@@ -165,10 +165,11 @@ class UI:
                     print("Type 'exit' to return")
                     option_book = input("Your option? ")
                     if option_book == 'exit':
-                        print("Closing the sub-menu...")
+                        print("Closing the sub-menu...\n")
                         break
                     elif option_book == '1':
                         self._add_book()
+                        print("\n")
                     elif option_book == '2':
                         while True:
                             print("1. Search book by title")
@@ -176,7 +177,7 @@ class UI:
                             print("Type 'exit' to return")
                             option_search_book = input("Your option? ")
                             if option_search_book == 'exit':
-                                print("Closing the sub-menu...")
+                                print("Closing the sub-menu...\n")
                                 break
                             elif option_search_book == '1':
                                 self._search_book_by_title()
@@ -195,7 +196,7 @@ class UI:
                     print("Type 'exit' to return")
                     option_client = input("Your option? ")
                     if option_client == 'exit':
-                        print("Closing the sub-menu...")
+                        print("Closing the sub-menu...\n")
                         break
                     elif option_client == '1':
                         self._add_client()
@@ -205,7 +206,7 @@ class UI:
                         while True:
                             option_search_client = input("Your option? ")
                             if option_search_client == 'exit':
-                                print("Closing the sub-menu...")
+                                print("Closing the sub-menu...\n")
                                 break
                             elif option_search_client == '1':
                                 self._search_client_by_name()

@@ -43,4 +43,15 @@ class Book:
     def set_status(self, status):
         self._status = status
 
-
+    @staticmethod
+    def create_book(identity, title, author, year, volume):
+        """
+        Creates a Book type object with the passed arguments.
+        :param identity: int
+        :param title: str
+        :param author: str
+        :param year: int
+        :param volume: str
+        :return: a Book type object
+        """
+        return Book(identity, title, author, year, volume)

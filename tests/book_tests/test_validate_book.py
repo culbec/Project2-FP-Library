@@ -1,40 +1,36 @@
 from datetime import datetime
 
+from domain.book import Book
 from utils.library_controller import LibraryController
 
 
 def test_validate_book():
     library_controller = LibraryController()
-    valid_book = library_controller.use_book_repository().create_book(1, 'Amintiri din copilarie', 'Ion Creanga',
-                                                                      1892, 'Amintiri din copilarie')
+    valid_book = Book.create_book(1, 'Amintiri din copilarie', 'Ion Creanga', 1892, 'Amintiri din copilarie')
     library_controller.use_book_validator().validate_book(valid_book)
 
-    wrong_author_book = library_controller.use_book_repository().create_book(12, 'Amintiri din copilarie', 15,
-                                                                             1892, 'Amintiri din copilarie')
+    wrong_author_book = Book.create_book(12, 'Amintiri din copilarie', 15, 1892, 'Amintiri din copilarie')
     try:
         library_controller.use_book_validator().validate_book(wrong_author_book)
         assert False
     except ValueError as ve:
         assert str(ve) == "The author's name needs to be a valid string."
 
-    wrong_title_book = library_controller.use_book_repository().create_book(15, 1234, 'Ion Creanga',
-                                                                            1892, 'Amintiri din Copilarie')
+    wrong_title_book = Book.create_book(15, 1234, 'Ion Creanga', 1892, 'Amintiri din Copilarie')
     try:
         library_controller.use_book_validator().validate_book(wrong_title_book)
         assert False
     except ValueError as ve:
         assert str(ve) == "The book's title needs to be a valid string."
 
-    wrong_year_book = library_controller.use_book_repository().create_book(15, 'Amintiri din copilarie', 'Ion Creanga',
-                                                                           'asd', 'Amintiri din copilarie')
+    wrong_year_book = Book.create_book(15, 'Amintiri din copilarie', 'Ion Creanga', 'asd', 'Amintiri din copilarie')
     try:
         library_controller.use_book_validator().validate_book(wrong_year_book)
         assert False
     except ValueError as ve:
         assert str(ve) == f"The book's release year needs to be betwwen 1680 and {datetime.now().year}."
 
-    wrong_volume_book = library_controller.use_book_repository().create_book(1, 'Amintiri din copilarie', 'Ion Creanga',
-                                                                             1892, 16)
+    wrong_volume_book = Book.create_book(1, 'Amintiri din copilarie', 'Ion Creanga', 1892, 16)
     try:
         library_controller.use_book_validator().validate_book(wrong_volume_book)
         assert False

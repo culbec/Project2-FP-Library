@@ -1,3 +1,5 @@
+from domain.book import Book
+from domain.client import Client
 from repository.repository_book import BookRepository
 from validate.validate_book import BookValidator
 from repository.repository_client import ClientRepository
@@ -84,10 +86,7 @@ class LibraryController:
         :raises ValueError: - if the client is not a valid one or if it already exists in the list.
         """
         client_id = client_id + 1
-        client = library_controller.use_client_repository().create_client(client_id,
-                                                                          client_name,
-                                                                          client_cnp,
-                                                                          client_subscription_year)
+        client = Client(client_id, client_name, client_cnp, client_subscription_year)
         library_controller.use_client_validator().validate_client(client, library_controller)
         library_controller.use_client_repository().add_client_to_list(client, library_controller)
 
@@ -105,11 +104,7 @@ class LibraryController:
         :raises ValueError - if the book is not a valid one or if it already exists in the list.
         """
         book_id = book_id + 1
-        book = library_controller.use_book_repository().create_book(book_id,
-                                                                    book_title,
-                                                                    book_author,
-                                                                    book_year,
-                                                                    book_volume)
+        book = Book(book_id, book_title, book_author, book_year, book_volume)
         library_controller.use_book_validator().validate_book(book)
         library_controller.use_book_repository().add_book_to_list(book, library_controller)
 
@@ -126,7 +121,13 @@ class LibraryController:
                               the associated string is: "Books with the passed title do not exist!
         """
         library_controller.use_book_validator().validate_title(title)
-        return library_controller.use_book_repository().search_book_by_title(title, library_controller)
+        book_list = []
+        for book in library_controller.get_book_dict().values():
+            if book.get_title() == title:
+                book_list.append(book)
+        if not book_list:
+            raise ValueError("Books with the passed title do not exist!")
+        return book_list
 
     @staticmethod
     def search_book_by_year_utils(year, library_controller):
@@ -142,7 +143,13 @@ class LibraryController:
                               the associated string is: "Books with the passed release year do not exist!"
         """
         library_controller.use_book_validator().validate_year(year)
-        return library_controller.use_book_repository().search_book_by_year(year, library_controller)
+        book_list = []
+        for book in library_controller.get_book_dict().values():
+            if book.get_year() == year:
+                book_list.append(book)
+        if not book_list:
+            raise ValueError("Books with the passed release year do not exist!")
+        return book_list
 
     @staticmethod
     def search_client_by_name_utils(name, library_controller):
@@ -157,4 +164,10 @@ class LibraryController:
                               the associated string is: "Clients with the passed name do not exist!"
         """
         library_controller.use_client_validator().validate_name(name)
-        return library_controller.use_client_repository().search_client_by_name(name, library_controller)
+        client_list = []
+        for client in library_controller.get_client_list():
+            if client.get_name() == name:
+                client_list.append(client)
+        if not client_list:
+            raise ValueError("Clients with the passed name do not exist!")
+        return client_list
