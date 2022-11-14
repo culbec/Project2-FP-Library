@@ -24,7 +24,7 @@ def test_add_book_to_list():
     book1 = library_controller.use_book_repository().create_book(15, 'Amintiri din copilarie', 'Ion Creanga',
                                                                  1892, 'Amintiri din copilarie')
     library_controller.use_book_repository().add_book_to_list(book1, library_controller)
-    assert len(library_controller.get_book_list()) == 1
+    assert len(library_controller.get_book_dict()) == 1
 
 
 def test_search_book_by_title():

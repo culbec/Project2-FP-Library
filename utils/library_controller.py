@@ -37,8 +37,10 @@ class LibraryController:
         self._book_controller = BookController()
         self._client_controller = ClientController()
 
-    def get_book_list(self):
-        return self._book_controller.get_book_repository().get_book_list()
+    # def get_book_list(self):
+        # return self._book_controller.get_book_repository().get_book_list()
+    def get_book_dict(self):
+        return self._book_controller.get_book_repository().get_book_dict()
 
     def get_client_list(self):
         return self._client_controller.get_client_repository().get_client_list()
@@ -46,11 +48,13 @@ class LibraryController:
     def get_client_books(self):
         return self._client_books
 
-    def set_book_list(self, book_list):
-        self._book_list = book_list
+    # def set_book_list(self, book_list):
+        # self._book_list = book_list
+    def set_book_dict(self, book_dict):
+        self._book_controller.get_book_repository()._book_dict = book_dict
 
     def set_client_list(self, client_list):
-        self._client_list = client_list
+        self._client_controller.get_client_repository()._client_list = client_list
 
     def set_client_books(self, client_books):
         self._client_books = client_books

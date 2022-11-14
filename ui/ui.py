@@ -11,12 +11,12 @@ class UI:
         """
         Prints a list of all books saved.
         """
-        book_list = self._controller.get_book_list()
-        if len(book_list) == 0:
+        book_dict = self._controller.get_book_dict()
+        if len(book_dict) == 0:
             print("There are no books saved.")
         else:
             print("The book list is:\n")
-            for book in book_list:
+            for book in book_dict.values():
                 print(f"[{book.get_identity()}] {book.get_title()} by {book.get_author()} published in "
                       f"{book.get_year()} in the volume {book.get_volume()} with the status '{book.get_status()}'.")
 
@@ -169,12 +169,11 @@ class UI:
                         break
                     elif option_book == '1':
                         self._add_book()
-                        print("\n")
                     elif option_book == '2':
-                        print("1. Search book by title")
-                        print("2. Search book by publish year")
-                        print("Type 'exit' to return")
                         while True:
+                            print("1. Search book by title")
+                            print("2. Search book by publish year")
+                            print("Type 'exit' to return")
                             option_search_book = input("Your option? ")
                             if option_search_book == 'exit':
                                 print("Closing the sub-menu...")

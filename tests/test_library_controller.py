@@ -23,7 +23,7 @@ def test_add_book_to_list_utils():
     library_controller = LibraryController()
     library_controller.add_book_to_list_utils(1, 'Amintiri din copilarie', 'Ion Creanga',
                                               1892, 'Amintiri din copilarie', library_controller)
-    assert len(library_controller.get_book_list()) == 1
+    assert len(library_controller.get_book_dict()) == 1
     try:
         library_controller.add_book_to_list_utils(200, 'The Great Gatsby', 123,
                                                   1928, 'The Great Gatsby', library_controller)

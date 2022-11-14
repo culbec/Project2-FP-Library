@@ -2,11 +2,17 @@ from domain.book import Book
 
 
 class BookRepository:
-    def __init__(self):
+    """def __init__(self):
         self._book_list = []
 
     def get_book_list(self):
-        return self._book_list
+        return self._book_list"""
+
+    def __init__(self):
+        self._book_dict = {}
+
+    def get_book_dict(self):
+        return self._book_dict
 
     @staticmethod
     def create_book(identity, title, author, year, volume):
@@ -29,7 +35,7 @@ class BookRepository:
         :param library_controller: LibraryController
         :return: nothing - just adds a boot to library_controller's book_list
         """
-        library_controller.get_book_list().append(book)
+        library_controller.get_book_dict().update({book.get_identity(): book})
 
     @staticmethod
     def search_book_by_title(title, library_controller):
@@ -42,7 +48,7 @@ class BookRepository:
                               the associated string is: "Books with the passed title do not exist!"
         """
         book_list = []
-        for book in library_controller.get_book_list():
+        for book in library_controller.get_book_dict().values():
             if book.get_title() == title:
                 book_list.append(book)
         if not book_list:
@@ -60,10 +66,9 @@ class BookRepository:
                               the associated string is: "Books with the passed release year do not exist!"
         """
         book_list = []
-        for book in library_controller.get_book_list():
+        for book in library_controller.get_book_dict().values():
             if book.get_year() == year:
                 book_list.append(book)
         if not book_list:
             raise ValueError("Books with the passed release year do not exist!")
         return book_list
-
