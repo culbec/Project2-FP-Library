@@ -2,6 +2,12 @@ from domain.book import Book
 
 
 class BookRepository:
+    def __init__(self):
+        self._book_list = []
+
+    def get_book_list(self):
+        return self._book_list
+
     @staticmethod
     def create_book(identity, title, author, year, volume):
         """

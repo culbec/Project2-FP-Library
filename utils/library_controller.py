@@ -33,20 +33,20 @@ class LibraryController:
         """
         Initializes the controller of our application.
         """
-        # will be completed with books
+        """# will be completed with books
         self._book_list = []
         # will be completed with clients
         self._client_list = []
-        # will be completed with {client : [{list of books}]}
+        # will be completed with {client : [{list of books}]}"""
         self._client_books = {}
         self._book_controller = BookController()
         self._client_controller = ClientController()
 
     def get_book_list(self):
-        return self._book_list
+        return self._book_controller.get_book_repository().get_book_list()
 
     def get_client_list(self):
-        return self._client_list
+        return self._client_controller.get_client_repository().get_client_list()
 
     def get_client_books(self):
         return self._client_books

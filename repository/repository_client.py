@@ -2,6 +2,12 @@ from domain.client import Client
 
 
 class ClientRepository:
+    def __init__(self):
+        self._client_list = []
+
+    def get_client_list(self):
+        return self._client_list
+
     @staticmethod
     def create_client(identity, name, cnp, subscription_year):
         """
