@@ -2,9 +2,9 @@ from domain.client import Client
 
 
 def test_create_client():
-    client1 = Client.create_client(1, 'Vasile Pop', 1021723551632, 2021)
-    client2 = Client.create_client(23, 'Ionescu Jean', 5010203511333, 2017)
-    client3 = Client.create_client(51, 'Maria Ion', 6120203111222, 2009)
+    client1 = Client(1, 'Vasile Pop', 1021723551632, 2021)
+    client2 = Client(23, 'Ionescu Jean', 5010203511333, 2017)
+    client3 = Client(51, 'Maria Ion', 6120203111222, 2009)
 
     assert client1.get_name() == 'Vasile Pop'
     assert client1.get_cnp() == 1021723551632

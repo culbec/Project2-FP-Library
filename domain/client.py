@@ -28,15 +28,3 @@ class Client:
 
     def set_subscription_year(self, subscription_year):
         self._subscription_year = subscription_year
-
-    @staticmethod
-    def create_client(identity, name, cnp, subscription_year):
-        """
-        Creates a Client object with the passed arguments.
-        :param identity: int
-        :param name: str
-        :param cnp: int
-        :param subscription_year: int
-        :return: a Client object with the passed arguments
-        """
-        return Client(identity, name, cnp, subscription_year)
