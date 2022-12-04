@@ -1,111 +1,64 @@
+import unittest
 from datetime import datetime
 
-from domain.book import Book
+from domain.entities import Book
 from validate.validate_book import BookValidator
 
 
-def test_validate_book():
-    book_validator = BookValidator()
-    valid_book = Book(1, 'Amintiri din copilarie', 'Ion Creanga', 1892, 'Amintiri din copilarie')
-    book_validator.validate_book(valid_book)
+class TestCasesBookValidator(unittest.TestCase):
+    def setUp(self) -> None:
+        self._validator = BookValidator()
 
-    wrong_author_book = Book(12, 'Amintiri din copilarie', 15, 1892, 'Amintiri din copilarie')
-    try:
-        book_validator.validate_book(wrong_author_book)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "The author's name needs to be a valid string."
+    def test_validate_book(self):
+        self.valid_book = Book(1, 'Amintiri din copilarie', 'Ion Creanga', 1892, 'Amintiri din copilarie')
+        self.wrong_author_book = Book(12, 'Amintiri din copilarie', 15, 1892, 'Amintiri din copilarie')
+        self.wrong_title_book = Book(15, 1234, 'Ion Creanga', 1892, 'Amintiri din Copilarie')
+        self.wrong_year_book = Book(15, 'Amintiri din copilarie', 'Ion Creanga', 'asd', 'Amintiri din copilarie')
+        self.wrong_volume_book = Book(1, 'Amintiri din copilarie', 'Ion Creanga', 1892, 16)
+        self.multiple_mistakes_book = Book(-1, 'a1c', '', 1300, 'Amintiri')
 
-    wrong_title_book = Book(15, 1234, 'Ion Creanga', 1892, 'Amintiri din Copilarie')
-    try:
-        book_validator.validate_book(wrong_title_book)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "The book's title needs to be a valid string."
+        self.assertIsNone(self._validator.validate_book(self.valid_book))
+        self.assertRaises(ValueError, self._validator.validate_book, self.wrong_author_book)
+        self.assertRaises(ValueError, self._validator.validate_book, self.wrong_title_book)
+        self.assertRaises(ValueError, self._validator.validate_book, self.wrong_year_book)
+        self.assertRaises(ValueError, self._validator.validate_book, self.wrong_volume_book)
+        self.assertRaises(ValueError, self._validator.validate_book, self.multiple_mistakes_book)
 
-    wrong_year_book = Book(15, 'Amintiri din copilarie', 'Ion Creanga', 'asd', 'Amintiri din copilarie')
-    try:
-        book_validator.validate_book(wrong_year_book)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == f"The book's release year needs to be betwwen 1680 and {datetime.now().year}."
+    def test_validate_title(self):
+        self._validator = BookValidator()
+        self.assertIsNone(self._validator.validate_title('Valid Title'))
+        self.assertRaises(ValueError, self._validator.validate_title, '')
 
-    wrong_volume_book = Book(1, 'Amintiri din copilarie', 'Ion Creanga', 1892, 16)
-    try:
-        book_validator.validate_book(wrong_volume_book)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "The book's volume needs to be a valid string."
+    def test_validate_volume(self):
+        self._validator = BookValidator()
+        self.assertIsNone(self._validator.validate_volume('Valid Volume'))
+        self.assertRaises(ValueError, self._validator.validate_volume, '')
 
+    def test_validate_year(self):
+        self._validator = BookValidator()
+        self.assertIsNone(self._validator.validate_year(1780))
+        self.assertRaises(ValueError, self._validator.validate_year, 1412)
+        self.assertRaises(ValueError, self._validator.validate_year, int(datetime.now().year) + 1)
 
-def test_validate_title():
-    book_validator = BookValidator()
-    valid_title = 'Valid Title'
-    book_validator.validate_title(valid_title)
+    def test_validate_author_name(self):
+        self._validator = BookValidator()
+        self.assertIsNone(self._validator.validate_author_name('Vasile Pop'))
+        self.assertRaises(ValueError, self._validator.validate_author_name, 'Vasile Pop-1Ion')
+        self.assertRaises(ValueError, self._validator.validate_author_name, '')
 
-    wrong_title = ''
-    try:
-        book_validator.validate_title(wrong_title)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "The title needs to be a valid string."
+    def test_validate_period(self):
+        self._validator = BookValidator()
+        self.assertIsNone(self._validator.validate_period(1800, 1900))
+        self.assertRaises(ValueError, self._validator.validate_period, 1800, 1799)
+        self.assertRaises(ValueError, self._validator.validate_period, 1499, 1500)
+        self.assertRaises(ValueError, self._validator.validate_period, 1400, 1900)
+        self.assertRaises(ValueError, self._validator.validate_period, 2002, int(datetime.now().year) + 1)
+        self.assertRaises(ValueError, self._validator.validate_period, int(datetime.now().year) + 1, 2012)
 
-
-def test_validate_volume():
-    book_validator = BookValidator()
-    valid_volume = 'Valid Volume'
-    book_validator.validate_volume(valid_volume)
-
-    wrong_volume = ''
-    try:
-        book_validator.validate_volume(wrong_volume)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "The volume needs to be a valid string."
-
-
-def test_validate_year():
-    book_validator = BookValidator()
-    valid_year = 1780
-    book_validator.validate_year(valid_year)
-
-    wrong_year = 1412
-    try:
-        book_validator.validate_year(wrong_year)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == f"The release year needs to be an integer between 1680 and {datetime.now().year}."
-
-
-def test_validate_author_name():
-    book_validator = BookValidator()
-    valid_name = 'Vasile Pop-Ion'
-
-    book_validator.validate_author_name(valid_name)
-
-    wrong_name = 'Vasile Pop-1Ion'
-    try:
-        book_validator.validate_author_name(wrong_name)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "The author's name needs to be a valid string."
-
-
-def test_validate_period():
-    book_validator = BookValidator()
-    book_validator.validate_period(1800, 1900)
-    try:
-        book_validator.validate_period(1650, 1901)
-        assert False
-    except ValueError:
-        assert True
-
-
-def test_validate_status():
-    book_validator = BookValidator()
-    book_validator.validate_status('Available')
-    try:
-        book_validator.validate_status('rEnted')
-        assert False
-    except ValueError:
-        assert True
+    def test_validate_status(self):
+        self._validator = BookValidator()
+        self.assertIsNone(self._validator.validate_status('Available'))
+        self.assertIsNone(self._validator.validate_status('Rented'))
+        self.assertRaises(ValueError, self._validator.validate_status, 'Availabl')
+        self.assertRaises(ValueError, self._validator.validate_status, '')
+        self.assertRaises(ValueError, self._validator.validate_status, 'rEntEd')

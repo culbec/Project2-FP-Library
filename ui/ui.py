@@ -5,6 +5,9 @@ class UI:
     def __init__(self):
         self._controller = LibraryController()
         self._number_books = 0
+        if self._controller.get_book_list():
+            self._number_books = self._controller.get_book_list()[len(self._controller.get_book_list()) - 1] \
+                .get_identity()
         self._number_clients = 0
 
     def _print_book_list(self):
@@ -17,8 +20,7 @@ class UI:
         else:
             print("The book list is:\n")
             for book in book_list:
-                print(f"[{book.get_identity()}] {book.get_title()} by {book.get_author()} published in "
-                      f"{book.get_year()} in the volume {book.get_volume()} with the status '{book.get_status()}'.")
+                print(book)
 
     def _print_client_list(self):
         """
@@ -30,18 +32,14 @@ class UI:
         else:
             print("The client list is:\n")
             for client in client_list:
-                print(f"[{client.get_identity()}] {client.get_name()} with the CNP {client.get_cnp()} "
-                      f"subscribed in {client.get_subscription_year()}.")
+                print(client)
 
-    def _print_client_books(self):
-        if not self._controller.get_client_books():
+    def _print_rentals(self):
+        if not self._controller.get_rentals():
             print("\nThere are no books rented.")
             return
-        for client, rented_books in self._controller.get_client_books().items():
-            print(f"\nThe client {client.get_name()} has rented these books:")
-            for book in rented_books:
-                print(f"[{book.get_identity()}] {book.get_title()} by {book.get_author()} published in "
-                      f"{book.get_year()} in the volume {book.get_volume()}.")
+        for rental in self._controller.get_rentals():
+            print(rental)
 
     def _add_book(self):
         """
@@ -62,7 +60,8 @@ class UI:
             return
         try:
             self._controller.add_book_to_list_utils(self._number_books, title, author, year, volume)
-            print(f"The book {title} by {author} published in {year} in the volume {volume} was added successfully!")
+            print(f"The book '{title}' by {author} published in {year} in the volume '{volume}'"
+                  f" was added successfully!")
             self._number_books = self._number_books + 1
         except ValueError as ve:
             print(str(ve))
@@ -98,13 +97,12 @@ class UI:
         """
         Modifies a book by a given title
         """
-        book_ids = []
         if not self._controller.get_book_list():
             print("The book list is clear. No books to modify!")
             return
-        for book in self._controller.get_book_list():
-            if book.get_status() == 'Available':
-                book_ids.append(book.get_identity())
+        books_rented = [rental.get_book().get_identity() for rental in self._controller.get_rentals()]
+        book_ids = [book.get_identity() for book in self._controller.get_book_list() if
+                    book.get_identity() not in books_rented]
         if len(book_ids) == 0:
             print("The book list does not contain any 'Available' books. No books to modify!")
             return
@@ -132,7 +130,7 @@ class UI:
                     return
                 continue
             break
-        book = self._controller.use_book_repository().search_book_by_id(input_id)
+        book = self._controller.get_book_repo().search_book_by_id(input_id)
         print("Available 'book' parameters to modify: ")
         print(f"Book title: {book.get_title()}")
         print(f"Book author: {book.get_author()}")
@@ -157,19 +155,18 @@ class UI:
         """
         Modifies a client.
         """
-        client_ids = []
         if not self._controller.get_client_list():
             print("The client list is clear. No clients to modify!")
             return
-        for client in self._controller.get_client_list():
-            if client not in self._controller.get_client_books().keys():
-                client_ids.append(client.get_identity())
+        client_rentals = [rental.get_client().get_identity() for rental in self._controller.get_rentals()]
+        client_ids = [client.get_identity() for client in self._controller.get_client_list() if
+                      client.get_identity() not in client_rentals]
         if not client_ids:
             print("The are no clients with no books rented. No clients to modify!")
             return
         print("Available clients to modify have these ids: ")
         for client_id in client_ids:
-            print(client_id, end='')
+            print(client_id, end=' ')
         print("\n", end='')
         print("Type 'exit' to return.")
         input_id = input("Your id? ")
@@ -190,7 +187,7 @@ class UI:
                     print("Exiting...\n", end='')
                 continue
             break
-        client = self._controller.use_client_repository().search_client_by_id(input_id)
+        client = self._controller.get_client_repo().search_client_by_id(input_id)
         print("Available 'client' parameters to modify: ")
         print(f"Client name: {client.get_name()}")
         print(f"Client subscription year: {client.get_subscription_year()}")
@@ -208,13 +205,12 @@ class UI:
             print(str(ve))
 
     def _delete_book(self):
-        book_ids = []
         if not self._controller.get_book_list():
             print("The book list is clear. No books to delete!")
             return
-        for book in self._controller.get_book_list():
-            if book.get_status() == 'Available':
-                book_ids.append(book.get_identity())
+        books_rented = [rental.get_book().get_identity() for rental in self._controller.get_rentals()]
+        book_ids = [book.get_identity() for book in self._controller.get_book_list() if
+                    book.get_identity() not in books_rented]
         if len(book_ids) == 0:
             print("The book list does not contain any 'Available' books. No books to delete!")
             return
@@ -242,17 +238,19 @@ class UI:
                     return
                 continue
             break
-        self._controller.delete_book_utils(input_id)
-        print("Book deleted successfully!")
+        try:
+            self._controller.delete_book_utils(input_id)
+            print("Book deleted successfully!")
+        except ValueError as ve:
+            print(str(ve))
 
     def _delete_client(self):
-        client_ids = []
         if not self._controller.get_client_list():
             print("The client list is clear. No clients to delete!")
             return
-        for client in self._controller.get_client_list():
-            if client not in self._controller.get_client_books().keys():
-                client_ids.append(client.get_identity())
+        client_rentals = [rental.get_client().get_identity() for rental in self._controller.get_rentals()]
+        client_ids = [client.get_identity() for client in self._controller.get_client_list() if
+                      client.get_identity() not in client_rentals]
         if not client_ids:
             print("There are no clients with no books rented. No clients to delete!")
             return
@@ -293,8 +291,7 @@ class UI:
         try:
             book_list = self._controller.search_book_by_title_utils(title)
             for book in book_list:
-                print(f"[{book.get_identity()}] {book.get_title()} by {book.get_author()} published in "
-                      f"{book.get_year()} in the volume {book.get_volume()} with the status '{book.get_status()}'")
+                print(book)
         except ValueError as ve:
             print(str(ve))
 
@@ -314,8 +311,7 @@ class UI:
         try:
             book_list = self._controller.search_book_by_year_utils(year)
             for book in book_list:
-                print(f"[{book.get_identity()}] {book.get_title()} by {book.get_author()} published in "
-                      f"{book.get_year()} in the volume {book.get_volume()} with the status '{book.get_status()}'")
+                print(book)
         except ValueError as ve:
             print(str(ve))
 
@@ -338,22 +334,7 @@ class UI:
         try:
             book_list = self._controller.search_book_in_time_period(start_year, finish_year)
             for book in book_list:
-                print(f"[{book.get_identity()}] {book.get_title()} by {book.get_author()} published in "
-                      f"{book.get_year()} in the volume {book.get_volume()} with the status '{book.get_status()}'")
-        except ValueError as ve:
-            print(str(ve))
-            return
-
-    def _search_book_by_status_utils(self):
-        if not self._controller.get_book_list():
-            print("The book list is clear.")
-            return
-        status = input("Searched status - 'Available' or 'Rented': ")
-        try:
-            book_list = self._controller.search_book_by_status_utils(status)
-            for book in book_list:
-                print(f"[{book.get_identity()}] {book.get_title()} by {book.get_author()} published in "
-                      f"{book.get_year()} in the volume {book.get_volume()} with the status '{book.get_status()}'")
+                print(book)
         except ValueError as ve:
             print(str(ve))
             return
@@ -369,8 +350,7 @@ class UI:
         try:
             client_list = self._controller.search_client_by_name_utils(name)
             for client in client_list:
-                print(f"[{client.get_identity()}] {client.get_name()} with the CNP {client.get_cnp()} "
-                      f"subscribed in {client.get_subscription_year()}")
+                print(client)
         except ValueError as ve:
             print(str(ve))
             return
@@ -387,8 +367,7 @@ class UI:
         try:
             client_list = self._controller.search_client_by_subscription_age_utils(sub_age)
             for client in client_list:
-                print(f"[{client.get_identity()}] {client.get_name()} with the CNP {client.get_cnp()} "
-                      f"subscribed in {client.get_subscription_year()}")
+                print(client)
         except ValueError as ve:
             print(str(ve))
             return
@@ -458,76 +437,85 @@ class UI:
             return
 
     def _return_book(self):
-        if not self._controller.get_client_books():
+        if not self._controller.get_rentals():
             print("No clients have rented books yet.")
             return
-        client_ids = [client.get_identity() for client in self._controller.get_client_books().keys()]
-        if not client_ids:
-            print("No clients have rented books yet.")
-            return
-        print("Available clients to return books from have these ids: ")
-        for client_id in client_ids:
-            print(client_id, end=' ')
-        print("\n", end='')
+        rental_ids = [rental.get_identity() for rental in self._controller.get_rentals()]
+        print("Available rentals to return have these ids: ")
+        for rental_id in rental_ids:
+            print(rental_id, end=' ')
+        print('\n', end='')
         print("Type 'exit' to return.")
-        client_input_id = input("Client id? ")
-        if client_input_id == 'exit':
+        rental_input_id = input("Rental id? ")
+        if rental_input_id == 'exit':
             print("Exiting...\n", end='')
             return
         while True:
-            try:
-                client_input_id = int(client_input_id)
-            except ValueError:
-                print("The id needs to be a valid integer.")
-                return
-            if client_input_id not in client_ids:
-                print("Client id not found. Try another!")
-                print("Type 'exit to return.")
-                client_input_id = input("Client id? ")
-                if client_input_id == 'exit':
-                    print("Exiting... \n", end='')
-                    return
-                continue
-            break
-        book_ids = [book.get_identity() for book in
-                    self._controller.get_client_books()[self._controller.use_client_repository()
-                    .search_client_by_id(client_input_id)]]
-        print("Available books to return have these ids: ")
-        for book_id in book_ids:
-            print(book_id, end=' ')
-        print("\n", end='')
-        print("Type 'exit' to return.")
-        book_input_id = input("Book id? ")
-        if book_input_id == 'exit':
-            print("Exiting...\n", end='')
-            return
-        while True:
-            try:
-                book_input_id = int(book_input_id)
-            except ValueError:
-                print("The id needs to be a valid integer.")
-                return
-            if book_input_id not in book_ids:
-                print("Book id not found. Try another!")
+            if rental_input_id not in rental_ids:
+                print("Rental id not found. Try another!")
                 print("Type 'exit' to return.")
-                book_input_id = input("Book id? ")
-                if book_input_id == 'exit':
+                rental_input_id = input("Rental id? ")
+                if rental_input_id == 'exit':
                     print("Exiting...\n", end='')
                     return
                 continue
             break
-        self._controller.return_book_utils(client_input_id, book_input_id)
-        print("Book returned successfully!")
-
-    def _search_client_rented_books(self):
         try:
-            client_list = self._controller.search_client_rented_books()
+            self._controller.return_book_utils(rental_input_id)
+            print("The book was returned successfully!")
+        except ValueError as ve:
+            print(str(ve))
+            return
+
+    def _search_client_in_rentals(self):
+        try:
+            client_list = self._controller.search_client_in_rentals()
             for client in client_list:
-                print(f"[{client.get_identity()}] {client.get_name()} with the CNP {client.get_cnp()} "
-                      f"subscribed in {client.get_subscription_year()}")
+                print(client)
         except TypeError as te:
             print(str(te))
             return
+
+    def _generate_random_book(self):
+        self._controller.generate_random_book()
+        print("Random book generated successfully!")
+
+    # Statistics
+    def _most_rented_books(self):
+        try:
+            book_list = self._controller.most_rented_books()
+            print("The most rented books, in order of rentals, are:")
+            for book, noRentals in book_list.items():
+                print(f"{book} with {noRentals} rentals")
+        except ValueError as ve:
+            print(str(ve))
+
+    def _sort_clients_by_name_and_no_rentals(self):
+        try:
+            client_list = self._controller.sort_clients_by_name_and_no_rentals()
+            print("The clients sorted by their name and number of rentals are:")
+            for client, noRentals in client_list.items():
+                print(f"{client} with {noRentals} rentals")
+        except ValueError as ve:
+            print(str(ve))
+
+    def _first_20_percent_most_active_clients(self):
+        try:
+            client_list = self._controller.first_20_percent_most_active_clients()
+            print("The most active 20% clients sorted by name and number of rentals are:")
+            for client, noRentals in client_list.items():
+                print(f"{client} with {noRentals} rentals")
+        except ValueError as ve:
+            print(str(ve))
+
+    def _sort_books_by_name(self):
+        try:
+            book_list = self._controller.sort_books_by_name()
+            print("The books sorted by their names are: ")
+            for book, noRentals in book_list.items():
+                print(f"{book} with {noRentals} rentals")
+        except ValueError as ve:
+            print(str(ve))
 
     def run_ui(self):
         while True:
@@ -535,8 +523,10 @@ class UI:
             print("1. Print")
             print("2. Books")
             print("3. Clients")
-            print("4. Rent book")
-            print("5. Return book")
+            print("4. Statistics")
+            print("5. Rent book")
+            print("6. Return book")
+            print("7. Generate a random book")
             print("Type 'exit' to close the app.")
 
             option = input("Your option? ")
@@ -561,7 +551,7 @@ class UI:
                         self._print_client_list()
                         print("\n", end='')
                     elif option_print == '3':
-                        self._print_client_books()
+                        self._print_rentals()
                         print("\n", end='')
                     else:
                         print("\nInvalid command!\n")
@@ -590,7 +580,6 @@ class UI:
                             print("\n1. Search book by title")
                             print("2. Search book by publish year")
                             print("3. Search books in a time period")
-                            print("4. Search books by status")
                             print("\nType 'exit' to return")
                             option_search_book = input("Your option? ")
                             if option_search_book == 'exit':
@@ -604,9 +593,6 @@ class UI:
                                 print("\n", end='')
                             elif option_search_book == '3':
                                 self._search_book_in_time_period()
-                                print("\n", end='')
-                            elif option_search_book == '4':
-                                self._search_book_by_status_utils()
                                 print("\n", end='')
                             else:
                                 print("\nInvalid command!\n")
@@ -649,17 +635,45 @@ class UI:
                                 self._search_client_by_subscription_age()
                                 print("\n", end='')
                             elif option_search_client == '3':
-                                self._search_client_rented_books()
+                                self._search_client_in_rentals()
                                 print("\n", end='')
                             else:
                                 print("\nInvalid command!\n")
                     else:
                         print("\nInvalid command!\n")
             elif option == '4':
+                while True:
+                    print("\n1. Show the most rented books")
+                    print("2. Show the clients ordered by their name and number of rented books")
+                    print("3. Show the 20% most active clients")
+                    print("4. Show all the books sorted by their name")
+                    print("\nType 'exit' to return")
+                    option_statistics = input("Your option? ")
+                    if option_statistics == 'exit':
+                        print("Closing the sub-menu...\n")
+                        break
+                    elif option_statistics == '1':
+                        self._most_rented_books()
+                        print("\n", end='')
+                    elif option_statistics == '2':
+                        self._sort_clients_by_name_and_no_rentals()
+                        print("\n", end='')
+                    elif option_statistics == '3':
+                        self._first_20_percent_most_active_clients()
+                        print("\n", end='')
+                    elif option_statistics == '4':
+                        self._sort_books_by_name()
+                        print("\n", end='')
+                    else:
+                        print("\nInvalid command!\n")
+            elif option == '5':
                 self._rent_book()
                 print("\n", end='')
-            elif option == '5':
+            elif option == '6':
                 self._return_book()
+                print("\n", end='')
+            elif option == '7':
+                self._generate_random_book()
                 print("\n", end='')
             else:
                 print("\nInvalid command!\n")

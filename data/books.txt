@@ -1,0 +1,5 @@
+1 ; Amintiri din copilarie ; Ion Creanga ; 1892 ; Amintiri din copilarie
+3 ; Ulysses ; James Grant ; 1922 ; Ulysses
+5 ; Baltagul ; Mihail Sadoveanu ; 1930 ; Baltagul
+6 ; Moara cu noroc ; Ioan Slavici ; 1881 ; Novele din popor
+7 ; Print si cersetor ; Mark Twain ; 1880 ; Print si cersetor

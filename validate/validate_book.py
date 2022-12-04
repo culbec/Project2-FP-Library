@@ -1,5 +1,5 @@
-from datetime import datetime
 import re
+from datetime import datetime
 
 
 class BookValidator:
@@ -61,6 +61,8 @@ class BookValidator:
         # Verifying the name of the book's author
         if not isinstance(author_name, str):
             raise ValueError("The author's name needs to be a valid string.")
+        elif author_name == '':
+            raise ValueError("The author's name needs to be a valid string.")
         else:
             list_of_names = re.split(r"\s+|-", author_name)
             for name in list_of_names:
@@ -70,8 +72,7 @@ class BookValidator:
                     if not character.isalpha() and character != '.':
                         raise ValueError("The author's name needs to be a valid string.")
 
-    @staticmethod
-    def validate_period(start_year, finish_year):
+    def validate_period(self, start_year, finish_year):
         """
         Validates year1 and year2 such that they are positive integers between 1680 and {current_year}.
         :param start_year: int
@@ -80,10 +81,16 @@ class BookValidator:
         :raises ValueError: - if either year1 or year2 are not positive integers between 1680 and {current_year}
                               the associated string is: "{start_year}/{finish_year} is not a positive integer between
                                                          1680 and {current_year}."
+                            - if start_year is greater than finish_year
+                              the associated string is: "The start year cannot be greater than the finish year."
         """
+        self.validate_year(start_year)
+        self.validate_year(finish_year)
+        if start_year > finish_year:
+            raise ValueError("The start year cannot be greater than the finish year.")
         if not (1680 <= start_year <= int(datetime.now().year)):
             raise ValueError(f"{start_year} is not a positive integer between 1680 and {datetime.now().year}")
-        if not(1680 <= finish_year <= int(datetime.now().year)):
+        if not (1680 <= finish_year <= int(datetime.now().year)):
             raise ValueError(f"{finish_year} is not a positive integer between 1680 and {datetime.now().year}")
 
     @staticmethod
@@ -119,32 +126,39 @@ class BookValidator:
                               the associated string is "Another book with the same id already exists."
         """
         # Verifying the name of the book's author
+        errors = []
         if not isinstance(book.get_author(), str):
-            raise ValueError("The author's name needs to be a valid string.")
+            errors.append("The author's name needs to be a valid string.")
+        elif book.get_author() == '':
+            errors.append("The author's name needs to be a valid string.")
         else:
             list_of_names = re.split(r"\s+|-", book.get_author())
             for name in list_of_names:
+                if name == '':
+                    continue
                 if not name[0].isupper():
-                    raise ValueError("The author's name needs to be a valid string.")
+                    errors.append("The author's name needs to be a valid string.")
                 for character in name:
                     if not character.isalpha() and character != '.':
-                        raise ValueError("The author's name needs to be a valid string.")
+                        errors.append("The author's name needs to be a valid string.")
 
         # Verifying the book's title
         if not isinstance(book.get_title(), str):
-            raise ValueError("The book's title needs to be a valid string.")
+            errors.append("The book's title needs to be a valid string.")
         else:
             if book.get_title() == '':
-                raise ValueError("The book's title needs to be a valid string.")
+                errors.append("The book's title needs to be a valid string.")
 
         if not isinstance(book.get_year(), int):
-            raise ValueError(f"The book's release year needs to be betwwen 1680 and {datetime.now().year}.")
+            errors.append(f"The book's release year needs to be betwwen 1680 and {datetime.now().year}.")
         else:
             if book.get_year() < 1680 or book.get_year() > int(datetime.now().year):
-                raise ValueError(f"The book's release year needs to be betwwen 1680 and {datetime.now().year}.")
+                errors.append(f"The book's release year needs to be betwwen 1680 and {datetime.now().year}.")
 
         if not isinstance(book.get_volume(), str):
-            raise ValueError("The book's volume needs to be a valid string.")
+            errors.append("The book's volume needs to be a valid string.")
         else:
             if book.get_volume() == '':
-                raise ValueError("The book's volume needs to be a valid string.")
+                errors.append("The book's volume needs to be a valid string.")
+        if errors:
+            raise ValueError(" ".join(errors).strip())

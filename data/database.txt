@@ -1,0 +1,4 @@
+1 ; Amintiri din copilarie ; Ion Creanga ; 1892 ; Amintiri din copilarie ; 4
+3 ; Ulysses ; James Grant ; 1922 ; Ulysses ; 2
+5030102111666 ; Ion Popa ; 5030102111666 ; 2012 ; 4
+5010302000111 ; Ion Pop ; 5010302000111 ; 2012 ; 2

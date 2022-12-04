@@ -1,96 +1,61 @@
+import unittest
 from datetime import datetime
 
-from domain.client import Client
+from domain.entities import Client
 from repository.repository_client import ClientRepository
-from utils.library_controller import LibraryController
 from validate.validate_client import ClientValidator
 
 
-def test_validate_client():
-    client_validator = ClientValidator()
-    client_repo = ClientRepository()
-    valid_client = Client(1, 'Vasile Pop', 5030122111222, 2012)
-    client_validator.validate_client(valid_client, client_repo)
-    client_repo.add_client_to_list(valid_client)
+class TestCasesClientValidator(unittest.TestCase):
+    def setUp(self) -> None:
+        self._validator = ClientValidator()
+        self._repo = ClientRepository()
 
-    wrong_name_client = Client(1, 'Vasile-alexandru pOp', 5030122111222, 2009)
-    try:
-        client_validator.validate_client(wrong_name_client, client_repo)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "The client's name needs to be a valid string."
+    def test_validate_client(self):
+        valid_client = Client('Vasile Pop', 5030101111222, 2012)
+        self.assertIsNone(self._validator.validate_client(valid_client, self._repo))
+        self._repo.add_client_to_list(valid_client)
 
-    wrong_cnp_client = Client(1, 'Vasile Pop', '5021c1', 2009)
-    try:
-        client_validator.validate_client(wrong_cnp_client, client_repo)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "The client's CNP needs to be a valid one."
+        wrong_name_client = Client('Vasile-alexandru pOp', 5030122111222, 2009)
+        self.assertRaises(ValueError, self._validator.validate_client, wrong_name_client, self._repo)
 
-    wrong_subscription_year_client = Client(1, 'Vasile Pop', 5030222111222, 1922)
-    try:
-        client_validator.validate_client(wrong_subscription_year_client, client_repo)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == f"The client's subscription year cannot be greater than {datetime.now().year} " \
-                          f"or more than 90 years of subscription."
+        wrong_cnp_client = Client('Vasile Pop', '5021c1', 2009)
+        self.assertRaises(ValueError, self._validator.validate_client, wrong_cnp_client, self._repo)
 
-    same_id_client = Client(1, 'Ion X', 5030101111222, 1987)
-    try:
-        client_validator.validate_client(same_id_client, client_repo)
-        assert False
-    except ValueError as ve:
-        assert str(ve) == "Another client with the same identity or CNP already exists."
+        wrong_subscription_year_client = Client('Vasile Pop', 5030222111222, 1922)
+        self.assertRaises(ValueError, self._validator.validate_client, wrong_subscription_year_client, self._repo)
 
+        same_id_client = Client('Ion X', 5030101111222, 1987)
+        self.assertRaises(ValueError, self._validator.validate_client, same_id_client, self._repo)
 
-def test_validate_name():
-    client_validator = ClientValidator()
+    def test_validate_name(self):
+        valid_name = 'John-Martin F. Reginald'
+        self.assertIsNone(self._validator.validate_name(valid_name))
 
-    valid_name = 'John-Martin F. Reginald'
-    client_validator.validate_name(valid_name)
+        wrong_name = 'John-Martin F.123  143'
+        self.assertRaises(ValueError, self._validator.validate_name, wrong_name)
 
-    wrong_name = 'John-Martin F.123  143'
-    try:
-        client_validator.validate_name(wrong_name)
-        assert False
-    except ValueError:
-        assert True
+        self.assertRaises(ValueError, self._validator.validate_name, '')
 
+    def test_validate_cnp(self):
+        valid_cnp = 5010302111666
+        self.assertIsNone(self._validator.validate_cnp(valid_cnp))
 
-def test_validate_cnp():
-    client_validator = ClientValidator()
+        wrong_cnp = '5010301222666'
+        self.assertRaises(ValueError, self._validator.validate_cnp, wrong_cnp)
+        self.assertRaises(ValueError, self._validator.validate_cnp, 'abcdefghijk123531')
 
-    valid_cnp = 5010302111666
-    client_validator.validate_cnp(valid_cnp)
+    def test_validate_sub_year(self):
+        valid_sub_year = 2001
+        self.assertIsNone(self._validator.validate_sub_year(valid_sub_year))
 
-    wrong_cnp = '5010301222666'
-    try:
-        client_validator.validate_cnp(wrong_cnp)
-        assert False
-    except ValueError:
-        assert True
+        wrong_sub_year = 1800
+        self.assertRaises(ValueError, self._validator.validate_sub_year, wrong_sub_year)
 
+        self.assertRaises(ValueError, self._validator.validate_sub_year, int(datetime.now().year) + 1)
+        self.assertRaises(ValueError, self._validator.validate_sub_year, '')
 
-def test_validate_sub_year():
-    client_validator = ClientValidator()
-
-    valid_sub_year = 2001
-    client_validator.validate_sub_year(valid_sub_year)
-
-    wrong_sub_year = 1800
-    try:
-        client_validator.validate_sub_year(wrong_sub_year)
-        assert False
-    except ValueError:
-        assert True
-
-
-def test_validate_subscription_age():
-    client_validator = ClientValidator()
-
-    client_validator.validate_subscription_age(80)
-    try:
-        client_validator.validate_subscription_age(91)
-        assert False
-    except ValueError:
-        assert True
+    def test_validate_subscription_age(self):
+        self.assertIsNone(self._validator.validate_subscription_age(80))
+        self.assertRaises(ValueError, self._validator.validate_subscription_age, 91)
+        self.assertRaises(ValueError, self._validator.validate_subscription_age, '')

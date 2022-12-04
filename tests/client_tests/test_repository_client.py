@@ -1,63 +1,63 @@
-from domain.client import Client
+import unittest
+
+from domain.entities import Client
 from repository.repository_client import ClientRepository
 
 
-def test_add_client_to_list():
-    client_repo = ClientRepository()
-    assert not client_repo.get_client_list()
+class TestCasesClientRepository(unittest.TestCase):
+    def setUp(self) -> None:
+        self._repo = ClientRepository()
+        self.client1 = Client('Vasile Pop', 50301111222222, 2019)
+        self.client2 = Client('Ion X', 1000000333333, 2002)
 
-    client1 = Client(50301111222222, 'Vasile Pop', 50301111222222, 2019)
-    client_repo.add_client_to_list(client1)
-    assert len(client_repo.get_client_list()) == 1
+    def test_add_client_to_list(self):
+        self.assertFalse(self._repo.get_client_list())
 
-    client2 = Client(1000000333333, 'Ion X', 1000000333333, 2002)
-    client_repo.add_client_to_list(client2)
-    assert len(client_repo.get_client_list()) == 2
+        self._repo.add_client_to_list(self.client1)
+        self.assertEqual(len(self._repo.get_client_list()), 1)
 
+        self._repo.add_client_to_list(self.client2)
+        self.assertEqual(len(self._repo.get_client_list()), 2)
 
-def test_modify_client():
-    client_repo = ClientRepository()
-    client1 = Client(50301111222222, 'Vasile Pop', 50301111222222, 2019)
-    client2 = Client(1000000333333, 'Ion X', 1000000333333, 2002)
+    def test_modify_client(self):
+        self._repo.add_client_to_list(self.client1)
+        self._repo.add_client_to_list(self.client2)
 
-    client_repo.add_client_to_list(client1)
-    client_repo.add_client_to_list(client2)
+        self.assertEqual(self.client1.get_identity(), 50301111222222)
+        self.assertEqual(self.client1.get_name(), 'Vasile Pop')
+        self.assertEqual(self.client1.get_cnp(), 50301111222222)
+        self.assertEqual(self.client1.get_subscription_year(), 2019)
 
-    client_repo.modify_client(client1, 'Maria Y', 2016)
-    client_repo.modify_client(client2, 'Vasile X', 2018)
+        self._repo.modify_client(self.client1, 'Maria Y', 2016)
+        self.assertEqual(self.client1.get_name(), 'Maria Y')
+        self.assertEqual(self.client1.get_subscription_year(), 2016)
 
-    assert client1.get_subscription_year() == 2016
-    assert client2.get_name() == 'Vasile X'
+        self.assertEqual(self.client2.get_identity(), 1000000333333)
+        self.assertEqual(self.client2.get_name(), 'Ion X')
+        self.assertEqual(self.client2.get_cnp(), 1000000333333)
+        self.assertEqual(self.client2.get_subscription_year(), 2002)
 
+        self._repo.modify_client(self.client2, 'Vasile X', 2018)
+        self.assertEqual(self.client2.get_name(), 'Vasile X')
+        self.assertEqual(self.client2.get_subscription_year(), 2018)
 
-def test_search_client_by_id():
-    client_repo = ClientRepository()
-    client1 = Client(5030201111222, 'Vasile Pop', 5030201111222, 2016)
-    client2 = Client(4010302111666, 'Ion X', 4010302111666, 2015)
+    def test_search_client_by_id(self):
+        self._repo.add_client_to_list(self.client1)
+        self._repo.add_client_to_list(self.client2)
 
-    client_repo.add_client_to_list(client1)
-    client_repo.add_client_to_list(client2)
+        self.assertEqual(self._repo.search_client_by_id(50301111222222), self.client1)
 
-    assert client_repo.search_client_by_id(5030201111222)
+        self.assertRaises(ValueError, self._repo.search_client_by_id, 5030201222111)
+        self.assertRaises(ValueError, self._repo.search_client_by_id, 1112223334445)
 
-    try:
-        client_repo.search_client_by_id(5030201222111)
-        assert False
-    except ValueError:
-        assert True
+    def test_delete_client(self):
+        self.assertFalse(self._repo.get_client_list())
 
+        self._repo.add_client_to_list(self.client1)
+        self._repo.add_client_to_list(self.client2)
 
-def test_delete_client():
-    client_repo = ClientRepository()
-    assert not client_repo.get_client_list()
-    client1 = Client(5030102111666, 'Vasile Pop', 5030102111666, 2016)
-    client2 = Client(5020103666111, 'Ion X', 5020103666111, 2019)
-
-    client_repo.add_client_to_list(client1)
-    client_repo.add_client_to_list(client2)
-
-    assert len(client_repo.get_client_list()) == 2
-    client_repo.delete_client(client1)
-    assert len(client_repo.get_client_list()) == 1
-    client_repo.delete_client(client2)
-    assert len(client_repo.get_client_list()) == 0
+        self.assertEqual(len(self._repo.get_client_list()), 2)
+        self._repo.delete_client(self.client1)
+        self.assertEqual(len(self._repo.get_client_list()), 1)
+        self._repo.delete_client(self.client2)
+        self.assertFalse(self._repo.get_client_list())

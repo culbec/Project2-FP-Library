@@ -1,3 +1,8 @@
+import io
+
+from domain.entities import Book
+
+
 class BookRepository:
     def __init__(self):
         self._book_list = []
@@ -5,13 +10,18 @@ class BookRepository:
     def get_book_list(self):
         return self._book_list
 
+    def set_book_list(self, book_list):
+        self._book_list = book_list
+
     def add_book_to_list(self, book):
         """
         Adds a book to library_controller's book_list
         :param book: Book
         :return: nothing - just adds a book to book_repository's book_list
         """
-        self._book_list.append(book)
+        book_list = self.get_book_list()
+        book_list.append(book)
+        self.set_book_list(book_list)
 
     def search_book_by_id(self, identity):
         """
@@ -48,4 +58,82 @@ class BookRepository:
         :param book: Book
         :return: nothing, just deletes that certain book
         """
-        self._book_list.remove(book)
+        book_list = self.get_book_list()
+        book_list.remove(book)
+        self.set_book_list(book_list)
+
+
+class BookRepositoryFile(BookRepository):
+    def __init__(self, filename):
+        BookRepository.__init__(self)
+        self._filename = filename
+        self._load_from_file()
+
+    def _load_from_file(self):
+        """
+        Reads data from a file
+        :return: book list from a file
+        """
+        try:
+            file = io.open(self._filename, mode='r', encoding='utf-8')
+        except IOError:
+            return
+
+        lines = file.readlines()
+        for line in lines:
+            book_id, book_title, book_author, book_year, book_volume = \
+                [token.strip() for token in line.split(';')]
+            book_id = int(book_id)
+            book_year = int(book_year)
+
+            book = Book(book_id, book_title, book_author, book_year, book_volume)
+            BookRepositoryFile.add_book_to_list(self, book)
+
+        file.close()
+
+    def save_to_file(self):
+        """
+        Saves data to the file
+        :return: -
+        """
+        book_list = BookRepository.get_book_list(self)
+        with open(self._filename, 'w') as file:
+            for book in book_list:
+                book_string = f"{str(book.get_identity())} ; {book.get_title()} ; {book.get_author()} ; " \
+                              f"{str(book.get_year())} ; {book.get_volume()}\n"
+                file.write(book_string)
+
+    def _clear_file(self):
+        with io.open(self._filename, mode='w', encoding='utf-8'):
+            pass
+
+    def add_book_to_list(self, book):
+        """
+        Adds a book to the book list
+        :param book: Book
+        :return:
+        """
+        BookRepository.add_book_to_list(self, book)
+        self.save_to_file()
+
+    def modify_book(self, book, title, author, year, volume):
+        """
+        Modifies the passed book with the passed arguments
+        :param book: Book
+        :param title: str
+        :param author: str
+        :param year: int
+        :param volume: str
+        :return: -
+        """
+        BookRepository.modify_book(book, title, author, year, volume)
+        self.save_to_file()
+
+    def delete_book(self, book):
+        """
+        Deletes a book from the book list
+        :param book: Book
+        :return:
+        """
+        BookRepository.delete_book(self, book)
+        self.save_to_file()
