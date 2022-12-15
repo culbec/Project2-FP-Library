@@ -1,4 +1,9 @@
 1 ; Amintiri din copilarie ; Ion Creanga ; 1892 ; Amintiri din copilarie ; 4
-3 ; Ulysses ; James Grant ; 1922 ; Ulysses ; 2
-5030102111666 ; Ion Popa ; 5030102111666 ; 2012 ; 4
-5010302000111 ; Ion Pop ; 5010302000111 ; 2012 ; 2
+3 ; Ulysses ; James Grant ; 1922 ; Ulysses ; 3
+6 ; Moara cu noroc ; Ioan Slavici ; 1881 ; Novele din popor ; 1
+7 ; Print si cersetor ; Mark Twain ; 1880 ; Print si cersetor ; 1
+9 ; Ulysses ; James Grant ; 1922 ; Ulysess ; 1
+1 ; Amintiri din copilarie ; Ion Creanga ; 1882 ; Amintiri din copilarie ; 1
+3 ; Povestea lui Harap-Alb ; Ion Creanga ; 1881 ; Basme ; 1
+5030102111666 ; Ion Popa ; 5030102111666 ; 2012 ; 7
+5010302000111 ; Ion Pop ; 5010302000111 ; 2012 ; 5

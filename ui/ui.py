@@ -1,3 +1,6 @@
+from repository.repository_book import BookRepository, BookRepositoryFile
+from repository.repository_client import ClientRepository, ClientRepositoryFile
+from repository.repository_rental import RentalRepository, RentalRepositoryFile
 from utils.library_controller import LibraryController
 
 
@@ -10,17 +13,21 @@ class UI:
                 .get_identity()
         self._number_clients = 0
 
-    def _print_book_list(self):
+    def _print_book_list(self, poz=0):
         """
-        Prints a list of all books saved.
+        Prints a list of all books saved. - Recursive
         """
         book_list = self._controller.get_book_list()
         if len(book_list) == 0:
             print("There are no books saved.")
         else:
-            print("The book list is:\n")
-            for book in book_list:
-                print(book)
+            # print("The book list is:\n")
+            if poz == len(book_list):
+                return
+            print(book_list[poz])
+            self._print_book_list(poz+1)
+            # for book in book_list:
+                # print(book)
 
     def _print_client_list(self):
         """
@@ -519,6 +526,26 @@ class UI:
 
     def run_ui(self):
         while True:
+            print("1. Memory repos")
+            print("2. File repos")
+            print("Type 'exit' to close the app.")
+            option = input("Your option? ")
+            if option == 'exit':
+                print("Bye!")
+                return
+            elif option == '1':
+                self._controller.set_book_repo(BookRepository())
+                self._controller.set_client_repo(ClientRepository())
+                self._controller.set_rental_repo(RentalRepository())
+                break
+            elif option == '2':
+                self._controller.set_book_repo(BookRepositoryFile("data/books_attr.txt"))
+                self._controller.set_client_repo(ClientRepositoryFile("data/clients.txt"))
+                self._controller.set_rental_repo(RentalRepositoryFile("data/rentals.txt"))
+                break
+            else:
+                print("Invalid command!")
+        while True:
             print("Available commands:")
             print("1. Print")
             print("2. Books")
@@ -545,6 +572,7 @@ class UI:
                         print("\nClosing the sub-menu...\n")
                         break
                     elif option_print == '1':
+                        print("The book list is: ")
                         self._print_book_list()
                         print("\n", end='')
                     elif option_print == '2':

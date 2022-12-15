@@ -67,7 +67,7 @@ class BookRepositoryFile(BookRepository):
     def __init__(self, filename):
         BookRepository.__init__(self)
         self._filename = filename
-        self._load_from_file()
+        self._load_from_file_attr()
 
     def _load_from_file(self):
         """
@@ -91,6 +91,24 @@ class BookRepositoryFile(BookRepository):
 
         file.close()
 
+    def _load_from_file_attr(self):
+        try:
+            file = io.open(self._filename, mode='r', encoding='utf-8')
+        except IOError:
+            return
+
+        line = file.readline()
+        while line != '':
+            book_id = int(line.strip())
+            book_title = file.readline().strip()
+            book_author = file.readline().strip()
+            book_year = int(file.readline().strip())
+            book_volume = file.readline().strip()
+            book = Book(book_id, book_title, book_author, book_year, book_volume)
+            BookRepositoryFile.add_book_to_list_attr(self, book)
+            line = file.readline()
+        file.close()
+
     def save_to_file(self):
         """
         Saves data to the file
@@ -107,6 +125,16 @@ class BookRepositoryFile(BookRepository):
         with io.open(self._filename, mode='w', encoding='utf-8'):
             pass
 
+    def save_to_file_attr(self):
+        book_list = BookRepository.get_book_list(self)
+        with io.open(self._filename, mode='w', encoding='utf-8') as file:
+            for book in book_list:
+                file.write(f"{book.get_identity()}\n")
+                file.write(f"{book.get_title()}\n")
+                file.write(f"{book.get_author()}\n")
+                file.write(f"{book.get_year()}\n")
+                file.write(f"{book.get_volume()}\n")
+
     def add_book_to_list(self, book):
         """
         Adds a book to the book list
@@ -115,6 +143,10 @@ class BookRepositoryFile(BookRepository):
         """
         BookRepository.add_book_to_list(self, book)
         self.save_to_file()
+
+    def add_book_to_list_attr(self, book):
+        BookRepository.add_book_to_list(self, book)
+        self.save_to_file_attr()
 
     def modify_book(self, book, title, author, year, volume):
         """
@@ -129,6 +161,10 @@ class BookRepositoryFile(BookRepository):
         BookRepository.modify_book(book, title, author, year, volume)
         self.save_to_file()
 
+    def modify_book_attr(self, book, title, author, year, volume):
+        BookRepository.modify_book(book, title, author, year, volume)
+        self.save_to_file_attr()
+
     def delete_book(self, book):
         """
         Deletes a book from the book list
@@ -137,3 +173,7 @@ class BookRepositoryFile(BookRepository):
         """
         BookRepository.delete_book(self, book)
         self.save_to_file()
+
+    def delete_book_attr(self, book):
+        BookRepository.delete_book(self,book)
+        self.save_to_file_attr()

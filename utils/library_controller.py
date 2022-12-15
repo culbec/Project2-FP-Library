@@ -3,6 +3,7 @@ import random
 import string
 from datetime import datetime
 
+from algorithms import sortingAlgorithms as sort_alg
 from domain.entities import Book, Client, Rental
 from repository.database import DatabaseFile
 from repository.repository_book import BookRepositoryFile
@@ -18,7 +19,7 @@ class LibraryController:
         """
         Initializes the controller of our application.
         """
-        self._book_repository = BookRepositoryFile("data/books.txt")
+        self._book_repository = BookRepositoryFile("data/books_attr.txt")
         self._book_validator = BookValidator()
         self._client_repository = ClientRepositoryFile("data/clients.txt")
         self._client_validator = ClientValidator()
@@ -41,17 +42,26 @@ class LibraryController:
     def get_book_repo(self):
         return self._book_repository
 
+    def set_book_repo(self, book_repo):
+        self._book_repository = book_repo
+
     def get_book_valid(self):
         return self._book_validator
 
     def get_client_repo(self):
         return self._client_repository
 
+    def set_client_repo(self, client_repo):
+        self._client_repository = client_repo
+
     def get_client_valid(self):
         return self._client_validator
 
     def get_rental_repo(self):
         return self._rental_repository
+
+    def set_rental_repo(self, rental_repo):
+        self._rental_repository = rental_repo
 
     def get_rental_valid(self):
         return self._rental_validator
@@ -83,7 +93,10 @@ class LibraryController:
         book_id = book_id + 1
         book = Book(book_id, book_title, book_author, book_year, book_volume)
         self.get_book_valid().validate_book(book)
-        self.get_book_repo().add_book_to_list(book)
+        if type(self.get_book_repo()) == BookRepositoryFile:
+            self.get_book_repo().add_book_to_list_attr(book)
+        else:
+            self.get_book_repo().add_book_to_list(book)
 
     @staticmethod
     def generate_random_string():
@@ -130,8 +143,12 @@ class LibraryController:
         self.get_book_valid().validate_author_name(book_author)
         self.get_book_valid().validate_year(book_year)
         self.get_book_valid().validate_volume(book_volume)
-        self.get_book_repo().modify_book(self.get_book_repo().search_book_by_id(book_id),
-                                         book_title, book_author, book_year, book_volume)
+        if type(self.get_book_repo()) == BookRepositoryFile:
+            self.get_book_repo().modify_book_attr(self.get_book_repo().search_book_by_id(book_id),
+                                                  book_title, book_author, book_year, book_volume)
+        else:
+            self.get_book_repo().modify_book(self.get_book_repo().search_book_by_id(book_id),
+                                             book_title, book_author, book_year, book_volume)
 
     def delete_book_utils(self, book_id):
         """
@@ -139,7 +156,10 @@ class LibraryController:
         :param book_id: int
         :return: nothing, just deletes that certain book
         """
-        self.get_book_repo().delete_book(self.get_book_repo().search_book_by_id(book_id))
+        if type(self.get_book_repo()) == BookRepositoryFile:
+            self.get_book_repo().delete_book_attr(self.get_book_repo().search_book_by_id(book_id))
+        else:
+            self.get_book_repo().delete_book(self.get_book_repo().search_book_by_id(book_id))
 
     def delete_client_utils(self, client_id):
         """
@@ -331,7 +351,8 @@ class LibraryController:
         """
         if not self.get_database().get_book_list():
             raise ValueError("The book list of the database is clear!")
-        sorted_tuple = sorted(self.get_database().get_book_list().items(), key=lambda item: item[1], reverse=True)
+        book_list = list(self.get_database().get_book_list().items())
+        sorted_tuple = sort_alg.bingo_sort(book_list, sort_alg.compare_rentals_books, reverse=True)
         return dict(sorted_tuple)
 
     def sort_clients_by_name_and_no_rentals(self):
@@ -344,9 +365,9 @@ class LibraryController:
         """
         if not self.get_database().get_client_list():
             raise ValueError("The client list of the database is clear!")
-        sorted_by_name = sorted(self.get_database().get_client_list().items(), key=lambda item: item[0].get_name())
-        sorted_dict = dict(sorted_by_name)
-        sorted_tuple = sorted(sorted_dict.items(), key=lambda item: item[1], reverse=True)
+        client_items_list = list(self.get_database().get_client_list().items())
+        sorted_by_name = sort_alg.merge_sort(client_items_list, sort_alg.compare_names_clients)
+        sorted_tuple = sort_alg.merge_sort(sorted_by_name, sort_alg.compare_client_rentals, reverse=True)
         return dict(sorted_tuple)
 
     def first_20_percent_most_active_clients(self):
@@ -363,7 +384,7 @@ class LibraryController:
         if not self.get_database().get_client_list():
             raise ValueError("The client list of the database is clear!")
         sorted_dict = self.sort_clients_by_name_and_no_rentals()
-        number_of_clients = (20.0 * len(sorted_dict)) / 100
+        number_of_clients = 0.2 * len(sorted_dict)
         if number_of_clients < 1.0:
             return sorted_dict
         else:
@@ -380,5 +401,6 @@ class LibraryController:
         """
         if not self.get_database().get_book_list():
             raise ValueError("The book list of the database is clear!")
-        sorted_tuple = sorted(self.get_database().get_book_list().items(), key=lambda item: item[0].get_title())
+        book_list = list(self.get_database().get_book_list().items())
+        sorted_tuple = sort_alg.bingo_sort(book_list, sort_alg.compare_names_books)
         return dict(sorted_tuple)
