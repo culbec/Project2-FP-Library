@@ -352,8 +352,8 @@ class LibraryController:
         if not self.get_database().get_book_list():
             raise ValueError("The book list of the database is clear!")
         book_list = list(self.get_database().get_book_list().items())
-        sorted_tuple = sort_alg.bingo_sort(book_list, sort_alg.compare_rentals_books, reverse=True)
-        return dict(sorted_tuple)
+        sorted_by_rentals = sort_alg.bingo_sort(book_list, key=lambda elem: elem[1], reverse=True)
+        return dict(sorted_by_rentals)
 
     def sort_clients_by_name_and_no_rentals(self):
         """
@@ -366,9 +366,9 @@ class LibraryController:
         if not self.get_database().get_client_list():
             raise ValueError("The client list of the database is clear!")
         client_items_list = list(self.get_database().get_client_list().items())
-        sorted_by_name = sort_alg.merge_sort(client_items_list, sort_alg.compare_names_clients)
-        sorted_tuple = sort_alg.merge_sort(sorted_by_name, sort_alg.compare_client_rentals, reverse=True)
-        return dict(sorted_tuple)
+        sorted_by_name = sort_alg.merge_sort(client_items_list, key=lambda elem: elem[0].get_name())
+        sorted_by_rentals = sort_alg.bingo_sort(sorted_by_name, key=lambda elem: elem[1], reverse=True)
+        return dict(sorted_by_rentals)
 
     def first_20_percent_most_active_clients(self):
         """
@@ -402,5 +402,5 @@ class LibraryController:
         if not self.get_database().get_book_list():
             raise ValueError("The book list of the database is clear!")
         book_list = list(self.get_database().get_book_list().items())
-        sorted_tuple = sort_alg.bingo_sort(book_list, sort_alg.compare_names_books)
-        return dict(sorted_tuple)
+        sorted_by_name = sort_alg.bingo_sort(book_list, key=lambda elem: elem[0].get_title())
+        return dict(sorted_by_name)
