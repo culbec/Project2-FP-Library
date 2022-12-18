@@ -30,7 +30,7 @@ def min_max(iterable, key, reverse):
     return mini, maxi
 
 
-def bingo_sort(iterable, key=None, reverse=False):
+def bingo_sort(iterable, key=lambda elem: elem[1], reverse=False):
     """
     Bingo sort the 'iterable' entity
     :param iterable: something iterable
@@ -56,7 +56,7 @@ def bingo_sort(iterable, key=None, reverse=False):
 
 
 # Merge sort - Recursive method
-def merge_sort(iterable, key=None, reverse=False):
+def merge_sort(iterable, key=lambda elem: elem[1], reverse=False):
     """
     Merge sorts the passed 'iterable' entity.
     :param iterable: something iterable
